@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, Globe, MessageSquare, RefreshCw, TrendingUp, TrendingDown, Activity, ExternalLink } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+import { getCoinPrediction } from "../services/predictionService";
 
 const CG_API_KEY = 'CG-XgRkwptpUH4LFa6Mub8chHXH';
 
@@ -589,6 +590,7 @@ const CoinDetail = () => {
   const [chartMetric, setChartMetric] = useState('prices');
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(true);
+  const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState(null);
 
   const fetchCoin = useCallback(async () => {
@@ -647,6 +649,18 @@ const CoinDetail = () => {
   useEffect(() => {
     fetchChart(chartDays);
   }, [fetchChart, chartDays, id]);
+  useEffect(() => {
+  const loadPrediction = async () => {
+    try {
+      const result = await getCoinPrediction(id);
+      setPrediction(result);
+    } catch (err) {
+      console.error("Prediction error:", err);
+    }
+  };
+
+  loadPrediction();
+}, [id]);
 
   const md = coin?.market_data;
   const price = md?.current_price?.usd;
@@ -697,6 +711,75 @@ const CoinDetail = () => {
           )}
 
           <SentimentSection md={md} />
+          <div className="bg-white/40 backdrop-blur-md rounded-3xl p-7 border border-[#556069]/5 shadow-lg">
+  <h3 className="font-bold text-[#556069] text-lg mb-5 font-headline">
+    AI Price Prediction
+  </h3>
+
+  {prediction ? (
+    <div className="space-y-4">
+      <div>
+        <p className="text-xs font-bold text-[#705953] uppercase tracking-wider">
+          Current Price
+        </p>
+
+        <p className="text-2xl font-bold text-[#556069]">
+          ${prediction.currentPrice}
+        </p>
+      </div>
+
+      <div>
+        <p className="text-xs font-bold text-[#705953] uppercase tracking-wider">
+          Predicted Price
+        </p>
+
+        <p className="text-3xl font-extrabold text-emerald-600">
+          ${prediction.predictedPrice}
+        </p>
+      </div>
+
+      <div className="flex justify-between">
+        <div>
+          <p className="text-xs font-bold text-[#705953] uppercase tracking-wider">
+            Signal
+          </p>
+
+          <p className="font-bold text-[#556069]">
+            {prediction.signal}
+          </p>
+        </div>
+
+        <div>
+          <p className="text-xs font-bold text-[#705953] uppercase tracking-wider">
+            Confidence
+          </p>
+
+          <p className="font-bold text-[#556069]">
+            {prediction.confidence}%
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs font-bold text-[#705953] uppercase tracking-wider">
+          Expected Change
+        </p>
+
+        <p className={`font-bold ${
+          prediction.change >= 0
+            ? "text-emerald-600"
+            : "text-rose-500"
+        }`}>
+          {prediction.change}%
+        </p>
+      </div>
+    </div>
+  ) : (
+    <p className="text-[#605d6a]">
+      Analyzing market trend...
+    </p>
+  )}
+</div>
 
           {/* Links */}
           <div className="bg-[#e2dded] rounded-3xl p-7 shadow-lg">
