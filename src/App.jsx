@@ -4,8 +4,6 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Market from './pages/Market';
-//import Prediction from './pages/Prediction';
-import About from './pages/About';
 import Ecosystem from './pages/Ecosystem';
 import Portfolio from './pages/Portfolio';
 import CoinDetail from './pages/CoinDetail';
