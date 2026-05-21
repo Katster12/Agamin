@@ -25,15 +25,12 @@ const Footer = () => {
           <ul className="space-y-2">
             <li><Link className="text-[#705953]/70 hover:text-[#556069] hover:translate-x-1 transition-all inline-block" to="/">Home</Link></li>
             <li><Link className="text-[#705953]/70 hover:text-[#556069] hover:translate-x-1 transition-all inline-block" to="/market">Cryptocurrencies</Link></li>
-            <li><Link className="text-[#705953]/70 hover:text-[#556069] hover:translate-x-1 transition-all inline-block" to="/prediction">Prediction</Link></li>
-            <li><Link className="text-[#705953]/70 hover:text-[#556069] hover:translate-x-1 transition-all inline-block" to="/about">About Us</Link></li>
           </ul>
         </div>
 
         <div className="space-y-4">
           <h4 className="font-bold text-[#556069]">Company</h4>
           <ul className="space-y-2">
-            <li><Link className="text-[#705953]/70 hover:text-[#556069] hover:translate-x-1 transition-all inline-block" to="/about">About Us</Link></li>
             <li><a className="text-[#705953]/70 hover:text-[#556069] hover:translate-x-1 transition-all inline-block" href="#">Privacy Policy</a></li>
             <li><a className="text-[#705953]/70 hover:text-[#556069] hover:translate-x-1 transition-all inline-block" href="#">Terms of Service</a></li>
             <li><a className="text-[#705953]/70 hover:text-[#556069] hover:translate-x-1 transition-all inline-block" href="#">Contact Us</a></li>
@@ -41,7 +38,7 @@ const Footer = () => {
         </div>
       </div>
       <div className="mt-16 pt-8 border-t border-[#556069]/10 max-w-7xl mx-auto text-center">
-        <p className="text-[#705953]/50 text-sm">© 2024 Agamin. Built for the Ethereal Vault.</p>
+        <p className="text-[#705953]/50 text-sm">© 2026 Agamin. Built for the Ethereal Vault.</p>
       </div>
     </footer>
   );

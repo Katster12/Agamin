@@ -4,7 +4,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Market from './pages/Market';
-import Prediction from './pages/Prediction';
+//import Prediction from './pages/Prediction';
 import About from './pages/About';
 import Ecosystem from './pages/Ecosystem';
 import Portfolio from './pages/Portfolio';
@@ -39,8 +39,6 @@ function App() {
 
             {/* Protected Routes */}
             <Route path="/market" element={<ProtectedRoute><Market /></ProtectedRoute>} />
-            <Route path="/prediction" element={<ProtectedRoute><Prediction /></ProtectedRoute>} />
-            <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
             <Route path="/ecosystem" element={<ProtectedRoute><Ecosystem /></ProtectedRoute>} />
             <Route path="/portfolio" element={<ProtectedRoute><Portfolio /></ProtectedRoute>} />
             <Route path="/coin/:id" element={<ProtectedRoute><CoinDetail /></ProtectedRoute>} />
