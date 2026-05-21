@@ -4,7 +4,7 @@ import { useAuth } from "./AuthContext";
 const Crypto = createContext();
 
 const TRACKED_IDS = "aave,cardano,avalanche-2,binancecoin,bitcoin,polkadot,ethereum,litecoin,pepe,matic-network,shiba-inu,solana,sui,tron,uniswap,ripple";
-const CG_API_KEY = "CG-XgRkwptpUH4LFa6Mub8chHXH";
+const CG_API_KEY = "CG-XgRkwptpUH4LFa6Mub8chHXH"; // kept for local dev fallback
 const FALLBACK_REFRESH_MS = 60000;
 
 const getWebSocketUrl = (backendUrl) => {
@@ -84,8 +84,7 @@ const CryptoContext = ({ children }) => {
   const fetchCoins = useCallback(async () => {
     try {
       const res = await fetch(
-        `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${TRACKED_IDS}&order=market_cap_desc&sparkline=true&price_change_percentage=1h%2C24h%2C7d`,
-        { headers: { "x-cg-demo-api-key": CG_API_KEY } }
+        `/api/coingecko?path=/coins/markets&vs_currency=usd&ids=${TRACKED_IDS}&order=market_cap_desc&sparkline=true&price_change_percentage=1h%2C24h%2C7d`
       );
 
       if (!res.ok) throw new Error(`CoinGecko API error ${res.status}`);

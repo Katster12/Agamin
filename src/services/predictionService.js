@@ -1,6 +1,6 @@
 export const getCoinPrediction = async (coinId) => {
   const res = await fetch(
-    `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart?vs_currency=usd&days=7`
+    `/api/coingecko?path=/coins/${coinId}/market_chart&vs_currency=usd&days=7`
   );
 
   const data = await res.json();

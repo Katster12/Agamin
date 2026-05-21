@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/api/coingecko",
+      "destination": "/api/coingecko"
+    },
+    {
+      "source": "/api/predict",
+      "destination": "/api/predict"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

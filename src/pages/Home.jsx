@@ -58,9 +58,7 @@ const Home = () => {
 
   const fetchHomeData = useCallback(async () => {
     try {
-      const globalRes = await fetch(`https://api.coingecko.com/api/v3/global`, {
-        headers: { 'x-cg-demo-api-key': CG_API_KEY },
-      });
+      const globalRes = await fetch(`/api/coingecko?path=/global`);
 
       if (globalRes.ok) {
         const g = await globalRes.json();

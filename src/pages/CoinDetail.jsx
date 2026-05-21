@@ -596,8 +596,7 @@ const CoinDetail = () => {
   const fetchCoin = useCallback(async () => {
     try {
       const res = await fetch(
-        `https://api.coingecko.com/api/v3/coins/${id}?localization=false&tickers=false&market_data=true&community_data=false&developer_data=false`,
-        { headers: { 'x-cg-demo-api-key': CG_API_KEY } }
+        `/api/coingecko?path=/coins/${id}&localization=false&tickers=false&market_data=true&community_data=false&developer_data=false`
       );
       if (!res.ok) throw new Error(`${res.status}`);
       const d = await res.json();
@@ -627,8 +626,7 @@ const CoinDetail = () => {
       }
 
       const res = await fetch(
-        `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}`,
-        { headers: { 'x-cg-demo-api-key': CG_API_KEY } }
+        `/api/coingecko?path=/coins/${id}/market_chart&vs_currency=usd&days=${days}`
       );
       if (!res.ok) throw new Error(`${res.status}`);
       const d = await res.json();
