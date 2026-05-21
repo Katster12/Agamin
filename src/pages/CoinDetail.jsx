@@ -750,13 +750,6 @@ const CoinDetail = () => {
         </div>
 
         <div>
-          <p className="text-xs font-bold text-[#705953] uppercase tracking-wider">
-            Confidence
-          </p>
-
-          <p className="font-bold text-[#556069]">
-            {prediction.confidence}%
-          </p>
         </div>
       </div>
 
