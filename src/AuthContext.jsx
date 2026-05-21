@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('agamin_token') || null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://agamin-backend.onrender.com";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://agamin-backend-79n0.onrender.com";
 
   useEffect(() => {
     const fetchUser = async () => {

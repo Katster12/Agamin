@@ -83,12 +83,7 @@ const Prediction = () => {
           </div>
 
           <div className="bg-[#705953] rounded-[2.5rem] p-8 text-white relative overflow-hidden">
-            <button
-  onClick={() => loadPrediction("BTC")}
-  className="bg-[#556069] text-white px-6 py-3 rounded-xl"
->
-  Test Prediction API
-</button>
+            
             <div className="relative z-10">
               <h3 className="text-xl font-bold mb-4 font-headline text-white/90">Premium Insights</h3>
               <p className="text-white/70 text-sm leading-relaxed mb-6">
