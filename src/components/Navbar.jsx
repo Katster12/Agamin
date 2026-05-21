@@ -10,8 +10,6 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Cryptocurrencies', path: '/market' },
-    { name: 'Prediction', path: '/prediction' },
-    { name: 'About Us', path: '/about' },
   ];
 
   return (
