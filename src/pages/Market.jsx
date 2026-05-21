@@ -1180,8 +1180,8 @@ const Market = () => {
           >
             Live Market
           </motion.h1>
-          <p className="text-[#705953] text-base max-w-xl">
-            Real-time prices from CoinGecko — auto-refresh every 10 s.
+          <p className="text-[#705953] text-base max-w-xl">Live cryptocurrency market overview.
+            
           </p>
         </div>
 
