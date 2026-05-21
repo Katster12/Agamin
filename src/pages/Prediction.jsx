@@ -2,6 +2,25 @@ import { motion } from 'framer-motion';
 import { Brain, TrendingUp, ShieldCheck, Zap } from 'lucide-react';
 
 const Prediction = () => {
+  const loadPrediction = async (coin) => {
+  try {
+
+    const response = await fetch("/api/predict", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ coin })
+    });
+
+    const data = await response.json();
+
+    console.log("Prediction API Response:", data);
+
+  } catch (error) {
+    console.error(error);
+  }
+};
   return (
     <div className="pt-32 pb-20 px-8 max-w-7xl mx-auto font-body">
       <div className="text-center space-y-6 mb-20">
@@ -64,6 +83,12 @@ const Prediction = () => {
           </div>
 
           <div className="bg-[#705953] rounded-[2.5rem] p-8 text-white relative overflow-hidden">
+            <button
+  onClick={() => loadPrediction("BTC")}
+  className="bg-[#556069] text-white px-6 py-3 rounded-xl"
+>
+  Test Prediction API
+</button>
             <div className="relative z-10">
               <h3 className="text-xl font-bold mb-4 font-headline text-white/90">Premium Insights</h3>
               <p className="text-white/70 text-sm leading-relaxed mb-6">

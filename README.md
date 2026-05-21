@@ -103,6 +103,53 @@ http://localhost:5173
 
 ---
 
+## ⚡ Real-Time Crypto Pipeline
+
+Agamin now supports the production realtime flow:
+
+```text
+Lambda
+   ↓
+Kinesis Stream
+   ↓
+Realtime Consumer Service (server.js)
+   ↓
+WebSocket Connections (/ws)
+   ↓
+React Frontend (CryptoContext)
+```
+
+The backend consumes records from AWS Kinesis and broadcasts `crypto:update` messages to every connected frontend. If AWS is not configured locally, the React app keeps working through the CoinGecko fallback fetcher.
+
+### Backend Environment
+
+Create a `.env` file for the Node backend:
+
+```bash
+PORT=5000
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=replace_with_a_strong_secret
+AWS_REGION=ap-south-1
+KINESIS_STREAM_NAME=your-crypto-stream-name
+KINESIS_POLL_MS=1000
+KINESIS_LIMIT=100
+```
+
+Your AWS credentials should come from the normal AWS provider chain, such as an IAM role in production or local `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` values during development.
+
+### Frontend Environment
+
+```bash
+VITE_BACKEND_URL=http://localhost:5000
+VITE_REALTIME_WS_URL=ws://localhost:5000/ws
+```
+
+For production, use `https://...` for `VITE_BACKEND_URL` and `wss://.../ws` for `VITE_REALTIME_WS_URL`.
+
+Expected Kinesis records can be a single coin object, an array of coin objects, or an object with a `coins` array. Coin objects should follow the CoinGecko-style fields already used by the UI, such as `id`, `symbol`, `name`, `image`, `current_price`, `market_cap`, `total_volume`, `market_cap_rank`, and price change percentages.
+
+---
+
 ## 📁 Project Structure
 
 ```

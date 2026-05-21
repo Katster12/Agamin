@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Search, TrendingUp, BarChart3, PieChart, ArrowRight, ArrowUpRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { CryptoState } from '../CryptoContext';
 
 const CG_API_KEY = 'CG-XgRkwptpUH4LFa6Mub8chHXH';
 
@@ -46,39 +47,28 @@ const TickerBand = ({ coins }) => {
 };
 
 const Home = () => {
-  const [tickerCoins, setTickerCoins] = useState([]);
   const [globalData, setGlobalData] = useState(null);
-  const [topGainer, setTopGainer] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const { coins } = CryptoState();
+  const tickerCoins = coins;
+  const topGainer = useMemo(() => [...coins].sort(
+    (a, b) => (b.price_change_percentage_24h ?? 0) - (a.price_change_percentage_24h ?? 0)
+  )[0], [coins]);
 
   const fetchHomeData = useCallback(async () => {
     try {
-      const ids = "aave,cardano,avalanche-2,binancecoin,bitcoin,polkadot,ethereum,litecoin,pepe,matic-network,shiba-inu,solana,sui,tron,uniswap,ripple";
-      const [coinsRes, globalRes] = await Promise.all([
-        fetch(
-          `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=false&price_change_percentage=24h`,
-          { headers: { 'x-cg-demo-api-key': CG_API_KEY } }
-        ),
-        fetch(`https://api.coingecko.com/api/v3/global`, {
-          headers: { 'x-cg-demo-api-key': CG_API_KEY },
-        }),
-      ]);
+      const globalRes = await fetch(`https://api.coingecko.com/api/v3/global`, {
+        headers: { 'x-cg-demo-api-key': CG_API_KEY },
+      });
 
-      if (coinsRes.ok) {
-        const coins = await coinsRes.json();
-        setTickerCoins(coins);
-        // top gainer from first 20
-        const gainer = [...coins].sort(
-          (a, b) => (b.price_change_percentage_24h ?? 0) - (a.price_change_percentage_24h ?? 0)
-        )[0];
-        setTopGainer(gainer);
-      }
       if (globalRes.ok) {
         const g = await globalRes.json();
         setGlobalData(g.data);
       }
-    } catch (_) {}
+    } catch (error) {
+      console.error("Failed to load global market data:", error);
+    }
   }, []);
 
   useEffect(() => {
@@ -130,7 +120,7 @@ const Home = () => {
             <span className="text-[#705953] italic">Trade with Confidence.</span>
           </h1>
           <p className="font-body text-xl md:text-2xl text-[#605d6a] max-w-2xl mx-auto leading-relaxed">
-            Real-time prices from CoinGecko, market data, and portfolio tools for the digital era.
+            Real-time crypto data from AWS, market signals, and portfolio tools for the digital era.
           </p>
 
           {/* Search */}
@@ -173,7 +163,7 @@ const Home = () => {
         <div className="flex justify-between items-end mb-12">
           <div>
             <h2 className="font-headline text-3xl font-bold text-[#556069]">Market Pulse</h2>
-            <p className="text-[#705953] mt-2">Live data from CoinGecko — updated in real-time.</p>
+            <p className="text-[#705953] mt-2">Live market updates from the realtime AWS pipeline.</p>
           </div>
           <Link to="/market" className="flex items-center gap-2 text-[#556069] font-bold hover:gap-4 transition-all">
             View all markets <ArrowRight size={20} />

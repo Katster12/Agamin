@@ -2,23 +2,45 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Globe, MessageSquare, RefreshCw, TrendingUp, TrendingDown, Activity, ExternalLink } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 
 const CG_API_KEY = 'CG-XgRkwptpUH4LFa6Mub8chHXH';
 
 // ── UTILITIES ────────────────────────────────────────────────────────────────
 const fmt = (n, dec = 2) => {
   if (n == null) return '—';
-  if (Math.abs(n) >= 1e12) return `$${(n / 1e12).toFixed(dec)}T`;
-  if (Math.abs(n) >= 1e9) return `$${(n / 1e9).toFixed(dec)}B`;
-  if (Math.abs(n) >= 1e6) return `$${(n / 1e6).toFixed(dec)}M`;
-  if (Math.abs(n) >= 1000) return `$${n.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
-  if (Math.abs(n) >= 1) return `$${n.toFixed(2)}`;
-  return `$${n.toFixed(6)}`;
+  const isNeg = n < 0;
+  const absN = Math.abs(n);
+  const sign = isNeg ? '-' : '';
+  if (absN >= 1e12) return `${sign}$${(absN / 1e12).toFixed(dec)}T`;
+  if (absN >= 1e9) return `${sign}$${(absN / 1e9).toFixed(dec)}B`;
+  if (absN >= 1e6) return `${sign}$${(absN / 1e6).toFixed(dec)}M`;
+  if (absN >= 1000) return `${sign}$${absN.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+  if (absN >= 1) return `${sign}$${absN.toFixed(2)}`;
+  return `${sign}$${absN.toFixed(6)}`;
 };
 
 const fmtNum = (n) => {
   if (n == null) return '—';
   return n.toLocaleString('en-US', { maximumFractionDigits: 0 });
+};
+
+const computeCVD = (data) => {
+  if (!data?.prices || !data?.total_volumes) return data;
+  let cumulative = 0;
+  const cvd = [];
+  for (let i = 0; i < data.prices.length; i++) {
+    const time = data.prices[i][0];
+    const price = data.prices[i][1];
+    const vol = data.total_volumes[i] ? data.total_volumes[i][1] : 0;
+    if (i > 0) {
+      const prevPrice = data.prices[i-1][1];
+      if (price >= prevPrice) cumulative += vol;
+      else cumulative -= vol;
+    }
+    cvd.push([time, cumulative]);
+  }
+  return { ...data, cvd };
 };
 
 // ── SUBCOMPONENTS ────────────────────────────────────────────────────────────
@@ -54,13 +76,41 @@ const CoinHeader = ({ coin, md, price, change24h, isUp }) => (
   </div>
 );
 
-const PriceCard = ({ chartData, chartLoading, chartDays, setChartDays, isUp }) => {
-  const prices = chartData?.prices || [];
+const PriceCard = ({ chartData, chartLoading, chartDays, setChartDays, isUp, chartSource, chartMetric, setChartMetric }) => {
+  const prices = chartData?.[chartMetric] || [];
   
+  const formatValue = (v) => {
+    return fmt(v, chartMetric === 'prices' ? 2 : 2);
+  };
+
   return (
     <div className="bg-white/40 backdrop-blur-md rounded-3xl border border-[#556069]/5 overflow-hidden shadow-lg">
-      <div className="flex items-center justify-between p-6 border-b border-[#556069]/5">
-        <h3 className="font-bold text-[#556069] font-headline">Price Chart</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 border-b border-[#556069]/5">
+        <div className="flex flex-wrap items-center gap-3">
+          <h3 className="font-bold text-[#556069] font-headline">
+            {chartMetric === 'prices' ? 'Price Chart' : chartMetric === 'market_caps' ? 'Market Cap Chart' : 'CVD (Cumulative Volume Delta)'}
+          </h3>
+          <div className="flex bg-[#556069]/5 p-1 rounded-xl border border-[#556069]/5">
+            {[
+              { label: 'Price', val: 'prices' },
+              { label: 'Market Cap', val: 'market_caps' },
+              { label: 'CVD', val: 'cvd' }
+            ].map(({ label, val }) => (
+              <button
+                key={val}
+                onClick={() => setChartMetric(val)}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all duration-250 cursor-pointer ${
+                  chartMetric === val
+                    ? 'bg-[#556069] text-white shadow-sm'
+                    : 'text-[#556069]/60 hover:text-[#556069]'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        
         <div className="flex gap-2">
           {[
             { label: '1D', val: 1 },
@@ -71,7 +121,7 @@ const PriceCard = ({ chartData, chartLoading, chartDays, setChartDays, isUp }) =
             <button
               key={val}
               onClick={() => setChartDays(val)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 chartDays === val
                   ? 'bg-[#556069] text-white'
                   : 'bg-[#556069]/5 text-[#556069] hover:bg-[#556069]/10'
@@ -88,26 +138,54 @@ const PriceCard = ({ chartData, chartLoading, chartDays, setChartDays, isUp }) =
             <RefreshCw size={24} className="text-[#556069]/30 animate-spin" />
           </div>
         ) : (
-          <div style={{ width: '100%', height: '100%', padding: '24px 0 0' }}>
-            <CoinChart chartData={chartData} isPositive={isUp} />
+          <div style={{ width: '100%', height: '100%' }}>
+            <CoinChart chartData={chartData} isPositive={isUp} chartDays={chartDays} chartMetric={chartMetric} />
           </div>
         )}
       </div>
       {prices.length > 1 && !chartLoading && (
         <div className="flex justify-between px-6 py-3 border-t border-[#556069]/5 text-xs text-[#556069]/50 font-medium tabular-nums">
-          <span>Low: {fmt(Math.min(...prices.map(p => p[1])))}</span>
-          <span>High: {fmt(Math.max(...prices.map(p => p[1])))}</span>
+          <span>Low: {formatValue(Math.min(...prices.map(p => p[1])))}</span>
+          <span>Source: {chartSource === 'athena' ? 'S3 + Athena' : 'CoinGecko fallback'}</span>
+          <span>High: {formatValue(Math.max(...prices.map(p => p[1])))}</span>
         </div>
       )}
     </div>
   );
 };
 
-const CoinChart = ({ chartData, isPositive }) => {
+// Helper to format axis labels based on time range
+const formatXAxisLabel = (timestamp, days) => {
+  const date = new Date(timestamp);
+  if (days <= 1) {
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+  } else if (days <= 7) {
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  } else if (days <= 30) {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } else {
+    return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  }
+};
+
+const formatYAxisLabel = (value) => {
+  if (value == null) return '—';
+  const isNeg = value < 0;
+  const absVal = Math.abs(value);
+  const sign = isNeg ? '-' : '';
+  if (absVal >= 1e12) return `${sign}$${(absVal / 1e12).toFixed(2)}T`;
+  if (absVal >= 1e9) return `${sign}$${(absVal / 1e9).toFixed(2)}B`;
+  if (absVal >= 1e6) return `${sign}$${(absVal / 1e6).toFixed(2)}M`;
+  if (absVal >= 1000) return `${sign}$${(absVal / 1000).toFixed(1)}K`;
+  if (absVal >= 1) return `${sign}$${absVal.toFixed(2)}`;
+  return `${sign}$${absVal.toFixed(4)}`;
+};
+
+const CoinChart = ({ chartData, isPositive, chartDays = 7, chartMetric = 'prices' }) => {
   const svgRef = useRef(null);
   const [hoverIdx, setHoverIdx] = useState(null);
 
-  const prices = chartData?.prices;
+  const prices = chartData?.[chartMetric];
   const volumes = chartData?.total_volumes;
 
   if (!prices || prices.length < 2) {
@@ -119,24 +197,43 @@ const CoinChart = ({ chartData, isPositive }) => {
   }
 
   const W = 800;
-  const H = 280;
-  const PAD_X = 0;
-  const PAD_Y = 10;
+  const H = 260;
+  const START_X = 85; 
+  const END_X = W - 30;
+  const START_Y = 25;
+  const END_Y = H - 45;
 
   const vals = prices.map((p) => p[1]);
   const minV = Math.min(...vals);
   const maxV = Math.max(...vals);
   const range = maxV - minV || 1;
 
-  const getX = (i) => PAD_X + (i / (vals.length - 1)) * (W - PAD_X * 2);
-  const getY = (v) => PAD_Y + (1 - (v - minV) / range) * (H - PAD_Y * 2);
+  const getX = (i) => START_X + (i / (vals.length - 1)) * (END_X - START_X);
+  const getY = (v) => START_Y + (1 - (v - minV) / range) * (END_Y - START_Y);
 
   const coords = vals.map((v, i) => `${getX(i).toFixed(2)},${getY(v).toFixed(2)}`);
   const line = `M ${coords.join(' L ')}`;
-  const area = `${line} L ${getX(vals.length - 1).toFixed(2)},${H} L ${getX(0).toFixed(2)},${H} Z`;
+  const area = `${line} L ${getX(vals.length - 1).toFixed(2)},${END_Y} L ${getX(0).toFixed(2)},${END_Y} Z`;
 
   const color = isPositive ? '#10b981' : '#f43f5e';
   const uid = `chart-${isPositive ? 'u' : 'd'}`;
+
+  // Generate grid values for Y-axis (4 levels)
+  const yTicks = [];
+  for (let i = 0; i <= 3; i++) {
+    yTicks.push(minV + (range * i) / 3);
+  }
+
+  // Generate grid indices for X-axis (4 levels)
+  const xTickIndices = [];
+  if (vals.length >= 4) {
+    xTickIndices.push(0);
+    xTickIndices.push(Math.floor((vals.length - 1) * 0.33));
+    xTickIndices.push(Math.floor((vals.length - 1) * 0.66));
+    xTickIndices.push(vals.length - 1);
+  } else {
+    vals.forEach((_, i) => xTickIndices.push(i));
+  }
 
   const handleMouseMove = (e) => {
     if (!svgRef.current) return;
@@ -157,7 +254,7 @@ const CoinChart = ({ chartData, isPositive }) => {
 
   return (
     <div 
-      className="relative w-full h-full cursor-crosshair group"
+      className="relative w-full h-full cursor-crosshair group px-2 py-4"
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setHoverIdx(null)}
       onTouchMove={(e) => handleMouseMove(e.touches[0])}
@@ -171,50 +268,258 @@ const CoinChart = ({ chartData, isPositive }) => {
       >
         <defs>
           <linearGradient id={uid} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity={0.4} />
-            <stop offset="100%" stopColor={color} stopOpacity={0.02} />
+            <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+            <stop offset="100%" stopColor={color} stopOpacity={0.01} />
           </linearGradient>
         </defs>
-        <path d={area} fill={`url(#${uid})`} />
-        <path d={line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" />
+
+        {/* ── BACKGROUND GRID LINES & AXIS LABELS ── */}
         
-        {/* Interactive Hover Elements */}
-        {hoverIdx !== null && (
+        {/* Horizontal Y-Gridlines & Labels */}
+        {yTicks.map((val, idx) => {
+          const y = getY(val);
+          return (
+            <g key={`y-grid-${idx}`}>
+              <line
+                x1={START_X}
+                y1={y}
+                x2={END_X}
+                y2={y}
+                stroke="#556069"
+                strokeWidth={1}
+                strokeDasharray="4 4"
+                opacity={0.12}
+              />
+              <text
+                x={START_X - 12}
+                y={y + 3.5}
+                fill="#556069"
+                fontSize="10px"
+                fontWeight="700"
+                textAnchor="end"
+                className="font-headline select-none pointer-events-none opacity-60 tabular-nums"
+              >
+                {formatYAxisLabel(val)}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* Vertical X-Gridlines, Ticks & Labels */}
+        {xTickIndices.map((i) => {
+          const x = getX(i);
+          const t = prices[i][0];
+          return (
+            <g key={`x-grid-${i}`}>
+              <line
+                x1={x}
+                y1={START_Y}
+                x2={x}
+                y2={END_Y}
+                stroke="#556069"
+                strokeWidth={1}
+                strokeDasharray="4 4"
+                opacity={0.08}
+              />
+              <line
+                x1={x}
+                y1={END_Y}
+                x2={x}
+                y2={END_Y + 5}
+                stroke="#556069"
+                strokeWidth={1.5}
+                opacity={0.4}
+              />
+              <text
+                x={x}
+                y={END_Y + 20}
+                fill="#556069"
+                fontSize="10px"
+                fontWeight="700"
+                textAnchor="middle"
+                className="font-headline select-none pointer-events-none opacity-60"
+              >
+                {formatXAxisLabel(t, chartDays)}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* ── AXES BORDERS ── */}
+        {/* Y-Axis Line */}
+        <line
+          x1={START_X}
+          y1={START_Y - 10}
+          x2={START_X}
+          y2={END_Y}
+          stroke="#556069"
+          strokeWidth={1.5}
+          opacity={0.3}
+        />
+        {/* X-Axis Line */}
+        <line
+          x1={START_X}
+          y1={END_Y}
+          x2={END_X + 10}
+          y2={END_Y}
+          stroke="#556069"
+          strokeWidth={1.5}
+          opacity={0.3}
+        />
+
+        {/* ── AXIS TITLES ── */}
+        {/* Y-Axis Title */}
+        <text
+          transform="rotate(-90)"
+          x={-(START_Y + END_Y) / 2}
+          y={22}
+          fill="#705953"
+          fontSize="9px"
+          fontWeight="800"
+          letterSpacing="2px"
+          textAnchor="middle"
+          className="font-headline select-none uppercase pointer-events-none opacity-80"
+        >
+          {chartMetric === 'prices' ? 'Value in USD (Price)' : chartMetric === 'market_caps' ? 'Value in USD (Market Cap)' : 'Cumulative Vol (USD)'}
+        </text>
+        {/* X-Axis Title */}
+        <text
+          x={(START_X + END_X) / 2}
+          y={H - 4}
+          fill="#705953"
+          fontSize="9px"
+          fontWeight="800"
+          letterSpacing="2px"
+          textAnchor="middle"
+          className="font-headline select-none uppercase pointer-events-none opacity-80"
+        >
+          Timeline ({chartDays} Day{chartDays > 1 ? 's' : ''})
+        </text>
+
+        {/* ── CHART PATHS with SMOOTH DRAW ANIMATION ── */}
+        {chartMetric === 'cvd' ? (
           <g>
-            <line 
-              x1={getX(hoverIdx)} y1={0} x2={getX(hoverIdx)} y2={H} 
-              stroke={color} strokeWidth={1} strokeDasharray="4 4" 
+            {vals.map((v, i) => {
+              const x = getX(i);
+              const w = Math.max(1, (END_X - START_X) / vals.length - 1);
+              const zeroY = Math.max(START_Y, Math.min(END_Y, getY(0)));
+              const y = getY(v);
+              const h = Math.abs(y - zeroY);
+              const top = Math.min(y, zeroY);
+              const isBarUp = v >= 0;
+              return (
+                <rect
+                  key={`cvd-bar-${i}`}
+                  x={x - w/2}
+                  y={top}
+                  width={w}
+                  height={Math.max(1, h)}
+                  fill={isBarUp ? '#10b981' : '#f43f5e'}
+                  opacity={hoverIdx === null || hoverIdx === i ? 0.9 : 0.3}
+                  className="transition-opacity duration-150"
+                />
+              );
+            })}
+          </g>
+        ) : (
+          <>
+            <motion.path
+              d={area}
+              fill={`url(#${uid})`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: chartMetric === 'market_caps' ? 0.7 : 1 }}
+              transition={{ duration: 0.4 }}
+              key={`area-${chartDays}-${chartMetric}-${prices.length}`}
             />
+            {chartMetric !== 'market_caps' && (
+              <motion.path
+                d={line}
+                fill="none"
+                stroke={color}
+                strokeWidth={2.5}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                initial={{ pathLength: 0, opacity: 0.5 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 0.75, ease: "easeOut" }}
+                key={`line-${chartDays}-${chartMetric}-${prices.length}`}
+              />
+            )}
+          </>
+        )}
+        
+        {/* ── INTERACTIVE HOVER CROSSHAIR & GLOWING DOT ── */}
+        {hoverIdx !== null && hoveredPrice !== null && (
+          <g>
+            {/* Vertical crosshair tracker */}
+            <line 
+              x1={getX(hoverIdx)} 
+              y1={START_Y - 5} 
+              x2={getX(hoverIdx)} 
+              y2={END_Y} 
+              stroke={color} 
+              strokeWidth={1.5} 
+              strokeDasharray="3 3" 
+            />
+            {/* Horizontal crosshair tracker */}
+            <line 
+              x1={START_X} 
+              y1={getY(hoveredPrice)} 
+              x2={END_X + 5} 
+              y2={getY(hoveredPrice)} 
+              stroke={color} 
+              strokeWidth={1.5} 
+              strokeDasharray="3 3" 
+              opacity={0.5}
+            />
+            {/* Pulsating outer core ring */}
             <circle 
-              cx={getX(hoverIdx)} cy={getY(hoveredPrice)} 
-              r={5} fill={color} stroke="#fff" strokeWidth={2} 
+              cx={getX(hoverIdx)} 
+              cy={getY(hoveredPrice)} 
+              r={9} 
+              fill={color} 
+              fillOpacity={0.2}
+              className="animate-ping"
+            />
+            {/* Glossy inner core dot */}
+            <circle 
+              cx={getX(hoverIdx)} 
+              cy={getY(hoveredPrice)} 
+              r={5} 
+              fill={color} 
+              stroke="#fff" 
+              strokeWidth={2} 
             />
           </g>
         )}
       </svg>
 
-      {/* Hover Tooltip (HTML overlay) */}
-      {hoverIdx !== null && (
+      {/* ── HOVER TOOLTIP OVERLAY ── */}
+      {hoverIdx !== null && hoveredPrice !== null && (
         <div 
-          className="absolute pointer-events-none bg-white rounded-xl shadow-xl border border-[#556069]/10 p-4 z-10 font-body transition-opacity duration-150"
+          className="absolute pointer-events-none bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-[#556069]/10 p-4 z-20 font-body transition-all duration-150 ease-out"
           style={{
-            left: `${(hoverIdx / (prices.length - 1)) * 100}%`,
-            top: '20px',
-            transform: `translateX(${(hoverIdx / prices.length) > 0.5 ? '-110%' : '10%'})`,
-            minWidth: '220px'
+            left: `${((getX(hoverIdx) - 8) / W) * 100}%`,
+            top: '12px',
+            transform: `translateX(${(hoverIdx / prices.length) > 0.72 ? '-105%' : (hoverIdx / prices.length) < 0.28 ? '5%' : '-50%'})`,
+            minWidth: '200px'
           }}
         >
-          <div className="text-xs font-bold text-[#556069]/60 mb-3 border-b border-[#556069]/10 pb-2">
+          <div className="text-[10px] font-bold text-[#705953] uppercase tracking-wider mb-2 border-b border-[#556069]/10 pb-1.5 select-none">
             {dateParts}
           </div>
-          <div className="flex justify-between items-center mb-1.5">
-            <span className="text-xs font-bold text-[#705953]">Price:</span>
-            <span className="text-sm font-bold text-[#556069] tabular-nums">{fmt(hoveredPrice, 4)}</span>
+          <div className="flex justify-between items-center gap-4 mb-1.5">
+            <span className="text-xs font-bold text-[#705953] uppercase tracking-wider select-none">
+              {chartMetric === 'prices' ? 'Price' : chartMetric === 'market_caps' ? 'Market Cap' : 'CVD'}:
+            </span>
+            <span className="text-sm font-extrabold text-[#556069] tabular-nums">
+              {fmt(hoveredPrice, chartMetric === 'prices' ? 4 : 2)}
+            </span>
           </div>
           {hoveredVol !== null && (
-            <div className="flex justify-between items-center">
-              <span className="text-xs font-bold text-[#705953]">Vol:</span>
-              <span className="text-sm font-bold text-[#556069] tabular-nums">{fmt(hoveredVol)}</span>
+            <div className="flex justify-between items-center gap-4">
+              <span className="text-xs font-bold text-[#705953] uppercase tracking-wider select-none">24h Vol:</span>
+              <span className="text-sm font-extrabold text-[#556069] tabular-nums">{fmt(hoveredVol)}</span>
             </div>
           )}
         </div>
@@ -275,10 +580,13 @@ const SentimentSection = ({ md }) => (
 
 const CoinDetail = () => {
   const { id } = useParams();
+  const { BACKEND_URL } = useAuth();
 
   const [coin, setCoin] = useState(null);
   const [chartData, setChartData] = useState(null);
+  const [chartSource, setChartSource] = useState(null);
   const [chartDays, setChartDays] = useState(7);
+  const [chartMetric, setChartMetric] = useState('prices');
   const [loading, setLoading] = useState(true);
   const [chartLoading, setChartLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -303,16 +611,30 @@ const CoinDetail = () => {
   const fetchChart = useCallback(async (days) => {
     setChartLoading(true);
     try {
+      const query = new URLSearchParams({ days: String(days) });
+      if (coin?.symbol) query.set('symbol', coin.symbol);
+
+      const athenaRes = await fetch(`${BACKEND_URL}/api/coins/${id}/history?${query.toString()}`);
+      if (athenaRes.ok) {
+        const athenaData = await athenaRes.json();
+        if (athenaData?.prices?.length > 1) {
+          setChartData(computeCVD(athenaData));
+          setChartSource('athena');
+          return;
+        }
+      }
+
       const res = await fetch(
         `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=${days}`,
         { headers: { 'x-cg-demo-api-key': CG_API_KEY } }
       );
       if (!res.ok) throw new Error(`${res.status}`);
       const d = await res.json();
-      setChartData(d);
+      setChartData(computeCVD(d));
+      setChartSource('coingecko');
     } catch (_) {}
     finally { setChartLoading(false); }
-  }, [id]);
+  }, [BACKEND_URL, coin?.symbol, id]);
 
   useEffect(() => {
     setLoading(true);
@@ -351,7 +673,16 @@ const CoinDetail = () => {
       <div className="flex flex-col lg:flex-row gap-12 items-start mb-12">
         <div className="w-full lg:w-2/3 space-y-8">
           <CoinHeader coin={coin} md={md} price={price} change24h={change24h} isUp={isUp} />
-          <PriceCard chartData={chartData} chartLoading={chartLoading} chartDays={chartDays} setChartDays={setChartDays} isUp={isUp} />
+          <PriceCard 
+            chartData={chartData} 
+            chartLoading={chartLoading} 
+            chartDays={chartDays} 
+            setChartDays={setChartDays} 
+            isUp={isUp} 
+            chartSource={chartSource} 
+            chartMetric={chartMetric}
+            setChartMetric={setChartMetric}
+          />
           <MarketStats md={md} coin={coin} />
         </div>
 

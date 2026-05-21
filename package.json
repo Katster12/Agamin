@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@aws-sdk/client-athena": "^3.1049.0",
+    "@aws-sdk/client-kinesis": "^3.1049.0",
     "@tailwindcss/vite": "^4.2.4",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -22,7 +24,8 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.2",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "ws": "^8.20.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
