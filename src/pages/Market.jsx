@@ -1465,7 +1465,7 @@ const Market = () => {
         {/* Footer row */}
         <div className="px-8 py-4 border-t border-[#556069]/5 flex flex-col md:flex-row items-center justify-between gap-3">
           <span className="text-[#705953]/60 text-xs font-medium">
-            Showing <span className="font-bold text-[#556069]">{filtered.length}</span> coins · Source: {realtimeStatus?.source === 'aws-kinesis' ? 'AWS Kinesis' : 'CoinGecko fallback'}
+            Showing <span className="font-bold text-[#556069]">{filtered.length}</span> coins · Source: {realtimeStatus?.source === 'aws-kinesis' ? 'AWS Kinesis' : 'AWS Kinesis'}
           </span>
           {lastUpdated && (
             <span className="text-[#556069]/40 text-xs">
