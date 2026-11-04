@@ -24,3 +24,9 @@ dist-ssr
 *.sw?
 .env
 .vercel
+.venv/
+.runtime/
+.runtime-test/
+.tools/
+__pycache__/
+*.pyc

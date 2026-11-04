@@ -1,5 +1,62 @@
 # Agamin
 
+## Live cached inference deployment
+
+The `new` branch now contains a production-oriented live inference service in `ml_service/`.
+It loads all 30 supplied BiLSTM bundles (10 coins × 30-minute/12-hour/24-hour horizons),
+fetches closed 1-minute candles from Binance's public market-data endpoint, reconstructs the
+training feature contract, and refreshes predictions concurrently.
+
+The service is intentionally research-only: the supplied artifacts did not meet their stated
+accuracy targets. API responses include the original held-out metrics and do not invent a
+confidence score.
+
+### Local persistent cache
+
+`.runtime/agamin-live.sqlite3` stores:
+
+- 36 days of 1-minute OHLCV per coin;
+- timestamped sentiment/Trends signal snapshots;
+- per-coin/per-horizon prediction JSON;
+- provider responses and failure TTLs.
+
+Prediction TTLs are 5 minutes (30min), 30 minutes (12h), and 60 minutes (24h). Candle downloads
+resume from the newest cached minute after restart. When no horizon has expired, the refresh path
+does not reload historical frames or rerun a model.
+
+### Run
+
+```bash
+python3.12 -m venv .venv
+.venv/bin/pip install -r requirements-live.txt
+.venv/bin/python -m ml_service.api
+
+curl http://127.0.0.1:8000/health
+curl -X POST http://127.0.0.1:8000/api/predict \
+  -H 'Content-Type: application/json' \
+  -d '{"coin":"BTC","horizons":["30min","12h","24h"]}'
+```
+
+Useful endpoints:
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /health` | model, refresh, and cache health |
+| `GET /api/models` | all deployed coin/horizon bundles |
+| `GET /api/predictions` | all locally cached forecasts |
+| `GET /api/best` | original best-per-horizon research summary |
+| `POST /api/predict` | cached forecast for a coin and requested horizons |
+| `POST /api/admin/refresh` | trigger a refresh; disabled unless `AGAMIN_API_KEY` is set |
+
+The checked-in systemd units under `deploy/` run the ML service and its outbound HTTPS tunnel.
+The frontend's Vercel function proxies `/api/predict` to that HTTPS service, while Vite proxies to
+`localhost:8000` during development.
+
+Environment controls include `AGAMIN_WORKERS`, `AGAMIN_REFRESH_SECONDS`, `AGAMIN_STATE_DIR`,
+`AGAMIN_API_KEY`, `ALPHA_VANTAGE_KEYS`, `TRENDS_PROXY_URL`, and `AGAMIN_ENABLE_TRENDS`.
+Alpha Vantage and Google Trends are best-effort auxiliary signals: failures are cached for 30
+minutes and inference continues with neutral values rather than repeatedly loading the provider.
+
 Crypto research project: a data pipeline that builds 1-minute feature datasets for 10 coins
 (Binance prices + Alpha Vantage news sentiment + Google Trends + volatility features), and a set of
 small PyTorch BiLSTM models trained on that data.

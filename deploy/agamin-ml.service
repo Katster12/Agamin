@@ -1,0 +1,23 @@
+[Unit]
+Description=Agamin live cached ML prediction service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/agamin_live_deploy
+Environment=PYTHONUNBUFFERED=1
+Environment=AGAMIN_HOST=0.0.0.0
+Environment=AGAMIN_PORT=8000
+Environment=AGAMIN_WORKERS=8
+Environment=AGAMIN_REFRESH_SECONDS=300
+Environment=AGAMIN_ENABLE_TRENDS=1
+ExecStart=/home/ubuntu/agamin_live_deploy/.venv/bin/python -m ml_service.api
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+
+[Install]
+WantedBy=multi-user.target

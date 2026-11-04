@@ -22,6 +22,10 @@ export default defineConfig({
           return `${cgPath}?${url.searchParams.toString()}`;
         },
       },
+      '/api/predict': {
+        target: process.env.ML_API_URL || 'http://127.0.0.1:8000',
+        changeOrigin: true,
+      },
     },
   },
 })
