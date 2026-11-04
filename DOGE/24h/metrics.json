@@ -1,0 +1,11 @@
+{
+  "symbol": "DOGE",
+  "label": "24h",
+  "model": "bilstm",
+  "train_days": 200.0,
+  "test_days": 99.0,
+  "test_windows": 100,
+  "test_sign": 0.38,
+  "test_mae_pct": 2.9585905840891926,
+  "reached_70": false
+}

@@ -1,0 +1,11 @@
+{
+  "symbol": "BTC",
+  "label": "24h",
+  "model": "bilstm",
+  "train_days": 200.0,
+  "test_days": 52.0,
+  "test_windows": 53,
+  "test_sign": 0.4339622641509434,
+  "test_mae_pct": 1.8523608220116583,
+  "reached_70": false
+}

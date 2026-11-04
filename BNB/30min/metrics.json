@@ -1,0 +1,11 @@
+{
+  "symbol": "BNB",
+  "label": "30min",
+  "model": "bilstm",
+  "train_days": 202.67,
+  "test_days": 124.96,
+  "test_windows": 5999,
+  "test_sign": 0.5139189864977496,
+  "test_mae_pct": 0.23997903243156368,
+  "reached_70": false
+}
