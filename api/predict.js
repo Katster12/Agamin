@@ -1,4 +1,5 @@
 const ENDPOINT_REGISTRY = "https://gist.githubusercontent.com/Katster12/12eee12c1e477a9120d8808ff6f03e64/raw/endpoint.json";
+const ENDPOINT_REGISTRY_API = "https://api.github.com/gists/12eee12c1e477a9120d8808ff6f03e64";
 const FALLBACK_ML_API_URL = "https://mitsubishi-prospects-answers-poultry.trycloudflare.com";
 let cachedEndpoint = "";
 let endpointExpiresAt = 0;
@@ -7,10 +8,15 @@ async function resolveMlApiUrl(force = false) {
   if (process.env.ML_API_URL) return process.env.ML_API_URL.replace(/\/$/, "");
   if (!force && cachedEndpoint && Date.now() < endpointExpiresAt) return cachedEndpoint;
   try {
-    const cacheKey = force ? Date.now() : Math.floor(Date.now() / 60000);
-    const response = await fetch(`${ENDPOINT_REGISTRY}?refresh=${cacheKey}`, { cache: "no-store" });
+    const registryUrl = force
+      ? `${ENDPOINT_REGISTRY_API}?refresh=${Date.now()}`
+      : `${ENDPOINT_REGISTRY}?refresh=${Math.floor(Date.now() / 60000)}`;
+    const response = await fetch(registryUrl, { cache: "no-store" });
     if (!response.ok) throw new Error(`endpoint registry returned ${response.status}`);
-    const data = await response.json();
+    const registryResponse = await response.json();
+    const data = force
+      ? JSON.parse(registryResponse.files['endpoint.json'].content)
+      : registryResponse;
     cachedEndpoint = String(data.url).replace(/\/$/, "");
     endpointExpiresAt = Date.now() + 60_000;
     return cachedEndpoint;
