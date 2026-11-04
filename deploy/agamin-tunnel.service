@@ -1,0 +1,16 @@
+[Unit]
+Description=Cloudflare HTTPS tunnel for Agamin ML API
+Wants=network-online.target agamin-ml.service
+After=network-online.target agamin-ml.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/agamin_live_deploy
+ExecStart=/home/ubuntu/agamin_live_deploy/.tools/cloudflared tunnel --no-autoupdate --url http://127.0.0.1:8000
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

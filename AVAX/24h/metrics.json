@@ -1,0 +1,11 @@
+{
+  "symbol": "AVAX",
+  "label": "24h",
+  "model": "bilstm",
+  "train_days": 200.0,
+  "test_days": 99.0,
+  "test_windows": 100,
+  "test_sign": 0.41,
+  "test_mae_pct": 2.764807446010943,
+  "reached_70": false
+}

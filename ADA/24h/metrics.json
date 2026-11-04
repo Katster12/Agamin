@@ -1,0 +1,11 @@
+{
+  "symbol": "ADA",
+  "label": "24h",
+  "model": "bilstm",
+  "train_days": 200.0,
+  "test_days": 99.0,
+  "test_windows": 100,
+  "test_sign": 0.47,
+  "test_mae_pct": 3.235376591258033,
+  "reached_70": false
+}

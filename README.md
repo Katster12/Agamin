@@ -1,220 +1,108 @@
-<div align="center">
+# Agamin
 
-# ⚡ Agamin — Track Every Coin
+## Live cached inference deployment
 
-**A premium, modern cryptocurrency tracking platform built with React.**
+The `new` branch now contains a production-oriented live inference service in `ml_service/`.
+It loads all 30 supplied BiLSTM bundles (10 coins × 30-minute/12-hour/24-hour horizons),
+fetches closed 1-minute candles from Binance's public market-data endpoint, reconstructs the
+training feature contract, and refreshes predictions concurrently.
 
-[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
-[![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-0055FF?style=for-the-badge&logo=framer&logoColor=white)](https://www.framer.com/motion/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+The service is intentionally research-only: the supplied artifacts did not meet their stated
+accuracy targets. API responses include the original held-out metrics and do not invent a
+confidence score.
 
-> *Real-time prices, market data, and portfolio tools — designed for the modern investor.*
+### Local persistent cache
 
-</div>
+`.runtime/agamin-live.sqlite3` stores:
 
----
+- 36 days of 1-minute OHLCV per coin;
+- timestamped sentiment/Trends signal snapshots;
+- per-coin/per-horizon prediction JSON;
+- provider responses and failure TTLs.
 
-## ✨ Features
+Prediction TTLs are 5 minutes (30min), 30 minutes (12h), and 60 minutes (24h). Candle downloads
+resume from the newest cached minute after restart. When no horizon has expired, the refresh path
+does not reload historical frames or rerun a model.
 
-- 📈 **Live Market Data** — Track the top cryptocurrencies with price, volume, and market cap
-- 🤖 **AI Predictions** — Algorithm-powered market sentiment and price forecasts
-- 💼 **Portfolio Tracker** — Monitor your holdings with activity history
-- 🖼️ **NFT Market** — Browse and track top NFT collections
-- 🔄 **Exchange Rankings** — Compare global exchanges by volume, liquidity, and security
-- 📚 **Education Hub** — Learn trading strategies and blockchain fundamentals
-- 🎨 **Premium UI/UX** — Glassmorphism design with smooth Framer Motion animations
-- ⚡ **Blazing Fast** — Built on Vite 6 for near-instant hot module replacement
-
----
-
-## 🖥️ Pages
-
-| Page | Route | Description |
-|------|-------|-------------|
-| 🏠 Home | `/` | Hero, market ticker, stats & market pulse |
-| 📊 Market | `/market` | Crypto table with filters and price changes |
-| 🔮 Prediction | `/prediction` | AI sentiment analysis and forecasts |
-| 🧬 Ecosystem | `/ecosystem` | Platform infrastructure overview |
-| 💼 Portfolio | `/portfolio` | Asset holdings and recent activity |
-| ₿ Bitcoin | `/bitcoin` | Deep-dive into BTC stats and information |
-| 📚 Learn | `/learn` | Education articles and tutorials |
-| 🖼️ NFTs | `/nfts` | NFT collections and market trends |
-| 🔁 Exchanges | `/exchanges` | Top exchange rankings and comparisons |
-| ℹ️ About | `/about` | Company mission and values |
-
----
-
-## 🛠️ Tech Stack
-
-| Technology | Version | Purpose |
-|------------|---------|---------|
-| React | 19 | UI Framework |
-| Vite | 6.0 | Build Tool & Dev Server |
-| Tailwind CSS | 4.x | Utility-First Styling |
-| Framer Motion | 12 | Animations & Transitions |
-| React Router DOM | 7 | Client-Side Routing |
-| Lucide React | Latest | Icon Library |
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- **Node.js** — version `20.19+` or `22.12+` recommended  
-  *(If on Node `22.11`, Vite v6 is already pinned in this project for compatibility)*
-- **npm** — version `8+`
-
-### Installation
-
-**1. Clone the repository**
-```bash
-git clone https://github.com/Pawan-Punjabi/Agamin.git
-cd Agamin
-```
-
-**2. Install dependencies**
-```bash
-npm install
-```
-
-**3. Start the development server**
-```bash
-npm run dev
-```
-
-**4. Open in browser**
-```
-http://localhost:5173
-```
-
----
-
-## 📦 Available Scripts
-
-| Script | Command | Description |
-|--------|---------|-------------|
-| Dev Server | `npm run dev` | Start local dev server with HMR |
-| Build | `npm run build` | Build optimized production bundle |
-| Preview | `npm run preview` | Preview production build locally |
-| Lint | `npm run lint` | Run ESLint on the codebase |
-
----
-
-## ⚡ Real-Time Crypto Pipeline
-
-Agamin now supports the production realtime flow:
-
-```text
-Lambda
-   ↓
-Kinesis Stream
-   ↓
-Realtime Consumer Service (server.js)
-   ↓
-WebSocket Connections (/ws)
-   ↓
-React Frontend (CryptoContext)
-```
-
-The backend consumes records from AWS Kinesis and broadcasts `crypto:update` messages to every connected frontend. If AWS is not configured locally, the React app keeps working through the CoinGecko fallback fetcher.
-
-### Backend Environment
-
-Create a `.env` file for the Node backend:
+### Run
 
 ```bash
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=replace_with_a_strong_secret
-AWS_REGION=ap-south-1
-KINESIS_STREAM_NAME=your-crypto-stream-name
-KINESIS_POLL_MS=1000
-KINESIS_LIMIT=100
+python3.12 -m venv .venv
+.venv/bin/pip install -r requirements-live.txt
+.venv/bin/python -m ml_service.api
+
+curl http://127.0.0.1:8000/health
+curl -X POST http://127.0.0.1:8000/api/predict \
+  -H 'Content-Type: application/json' \
+  -d '{"coin":"BTC","horizons":["30min","12h","24h"]}'
 ```
 
-Your AWS credentials should come from the normal AWS provider chain, such as an IAM role in production or local `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` values during development.
+Useful endpoints:
 
-### Frontend Environment
+| Endpoint | Purpose |
+|---|---|
+| `GET /health` | model, refresh, and cache health |
+| `GET /api/models` | all deployed coin/horizon bundles |
+| `GET /api/predictions` | all locally cached forecasts |
+| `GET /api/best` | original best-per-horizon research summary |
+| `POST /api/predict` | cached forecast for a coin and requested horizons |
+| `POST /api/admin/refresh` | trigger a refresh; disabled unless `AGAMIN_API_KEY` is set |
+
+The checked-in systemd units under `deploy/` run the ML service and its outbound HTTPS tunnel.
+The frontend's Vercel function proxies `/api/predict` to that HTTPS service, while Vite proxies to
+`localhost:8000` during development.
+
+Environment controls include `AGAMIN_WORKERS`, `AGAMIN_REFRESH_SECONDS`, `AGAMIN_STATE_DIR`,
+`AGAMIN_API_KEY`, `ALPHA_VANTAGE_KEYS`, `TRENDS_PROXY_URL`, and `AGAMIN_ENABLE_TRENDS`.
+Alpha Vantage and Google Trends are best-effort auxiliary signals: failures are cached for 30
+minutes and inference continues with neutral values rather than repeatedly loading the provider.
+
+Crypto research project: a data pipeline that builds 1-minute feature datasets for 10 coins
+(Binance prices + Alpha Vantage news sentiment + Google Trends + volatility features), and a set of
+small PyTorch BiLSTM models trained on that data.
+
+**Status: research only. None of the models reached its accuracy target; results are not tradeable.**
+There is no exchange connection and no order/trading code in this repository.
+
+Full documentation: **[docs/PROJECT.md](docs/PROJECT.md)**
+
+## Layout
+
+| Path | What it is |
+|---|---|
+| `crypto_pipeline.py` | Data pipeline "v6" (Binance klines, AV sentiment, Google Trends, ATR/BBW) -> daily CSVs |
+| `cache/zips/` | 99 monthly Binance 1m kline zips (9 coins x May 2025 - Mar 2026) and their 99 unzipped CSVs |
+| `cache/output/<COIN>/` | Pipeline output: one CSV per coin per day (BTC: a single `BTC.csv`) |
+| `cache/sentiment/`, `cache/trends/`, `cache/checkpoints/` | Cached API results and resume checkpoints |
+| `grok_edit_v1/` | BTC 30-min BiLSTM + attention classifier, its model, scaler, metrics and test predictions |
+| `grok_study_v3/` | BiLSTM return regressor for 10 coins x 3 horizons (30min/12h/24h): models, scalers, metrics |
+| `grok_study_best_v2/` | Best coin per horizon from the study (copies of three `grok_study_v3` runs) + `summary.json` |
+| `pipeline.log`, `run.out` | Logs from the pipeline run of 5-6 Oct 2026 |
+
+## Setup
+
+Two separate virtual environments (Python 3.12):
 
 ```bash
-VITE_BACKEND_URL=http://localhost:5000
-VITE_REALTIME_WS_URL=ws://localhost:5000/ws
+python3.12 -m venv venv && venv/bin/pip install -r requirements-pipeline.txt
+python3.12 -m venv grok_edit_v1/venv && grok_edit_v1/venv/bin/pip install -r requirements-models.txt
 ```
 
-For production, use `https://...` for `VITE_BACKEND_URL` and `wss://.../ws` for `VITE_REALTIME_WS_URL`.
+No `.env` or extra configuration is needed. `crypto_pipeline.py` is committed exactly as it was on the VM:
+the Alpha Vantage keys (`AV_API_KEYS`, lines 64-74) and the Google Trends proxy (`PROXY_URL`, line 117)
+are hardcoded in the script. **This repository therefore contains live credentials. Keep it private.**
 
-Expected Kinesis records can be a single coin object, an array of coin objects, or an object with a `coins` array. Coin objects should follow the CoinGecko-style fields already used by the UI, such as `id`, `symbol`, `name`, `image`, `current_price`, `market_cap`, `total_volume`, `market_cap_rank`, and price change percentages.
+## What is not in this repository
 
----
+This repository mirrors `/home/ubuntu/crypto` on the VM as-is: every file is byte-for-byte the original,
+including `crypto_pipeline.py` and the unzipped `cache/zips/*.csv`. Only these are missing:
 
-## 📁 Project Structure
+- `venv/` and `grok_edit_v1/venv/`: virtual environments; recreate them from `requirements-*.txt`.
+- `cache/output.zip` (172,592,264 bytes, 172.6 MB): over GitHub's 100 MB per-file limit for git, so it is
+  attached unchanged (byte-for-byte the VM file) to the GitHub Release **`data-2026-10-29`** instead. Download it
+  from the repo's Releases page, or `gh release download data-2026-10-29 -R warrior123-coder/agamin -D cache`.
+  Its contents duplicate `cache/output/`: all 3,015 files inside matched the files on disk by sha256
+  (`cache/output/BTC/BTC.csv` exists only on disk and is included in git).
 
-```
-Agamin/
-├── public/               # Static assets (favicon, icons)
-├── src/
-│   ├── components/
-│   │   ├── Navbar.jsx    # Navigation bar with active route highlighting
-│   │   └── Footer.jsx    # Site-wide footer with links
-│   ├── pages/
-│   │   ├── Home.jsx      # Landing page with ticker and stats
-│   │   ├── Market.jsx    # Crypto market table
-│   │   ├── Prediction.jsx# AI predictions dashboard
-│   │   ├── Ecosystem.jsx # Platform ecosystem overview
-│   │   ├── Portfolio.jsx # User portfolio tracker
-│   │   ├── Bitcoin.jsx   # Bitcoin detail page
-│   │   ├── Learn.jsx     # Education hub
-│   │   ├── NFTs.jsx      # NFT collections
-│   │   ├── Exchanges.jsx # Exchange rankings
-│   │   └── About.jsx     # About page
-│   ├── App.jsx           # Root component with routing
-│   ├── main.jsx          # React DOM entry point
-│   └── index.css         # Global styles + Tailwind imports
-├── index.html            # HTML entry point
-├── vite.config.js        # Vite configuration
-├── package.json          # Dependencies and scripts
-└── README.md             # You are here!
-```
-
----
-
-## 🎨 Design System
-
-Agamin uses a hand-crafted design token system built on **Tailwind CSS v4**:
-
-- **Primary:** `#556069` — Muted blue-grey for primary actions
-- **Tertiary:** `#705953` — Warm mauve for accents and highlights
-- **Background:** `#fff7fa` — Soft warm white
-- **Typography:** `Epilogue` (headlines) + `Plus Jakarta Sans` (body)
-- **Effects:** Glassmorphism, mesh gradients, backdrop blur
-
----
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/AmazingFeature`
-3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
-4. Push to the branch: `git push origin feature/AmazingFeature`
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-<div align="center">
-
-**Built with ❤️ by [Pawan Punjabi](https://github.com/Pawan-Punjabi)**
-
-⭐ *If you like this project, give it a star!* ⭐
-
-</div>
+The files added for the repository are `.gitignore`, `README.md`, `docs/PROJECT.md` and the three
+`requirements*.txt` files.

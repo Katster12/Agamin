@@ -1,0 +1,10 @@
+# Agamin uses two separate virtual environments (they pin slightly different numpy
+# versions, so do not install both files into one venv).
+#
+#   Data pipeline  (crypto_pipeline.py)            -> requirements-pipeline.txt
+#     python3.12 -m venv venv && venv/bin/pip install -r requirements-pipeline.txt
+#
+#   Model training (grok_edit_v1, grok_study_v3)   -> requirements-models.txt
+#     python3.12 -m venv grok_edit_v1/venv && grok_edit_v1/venv/bin/pip install -r requirements-models.txt
+#
+# This file intentionally installs nothing by itself.
