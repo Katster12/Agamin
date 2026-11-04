@@ -1,0 +1,40 @@
+{
+  "version": "grok_edit_v1",
+  "min_move_pct": 0.4,
+  "p_star": 0.5,
+  "epochs_ran": 8,
+  "best_val_loss": 1.1245611129413164,
+  "last_train_loss": 0.9169309020999791,
+  "n_train": 54165,
+  "n_val": 11565,
+  "n_test": 11572,
+  "n_large_test": 2250,
+  "gated": {
+    "n": 794.0,
+    "precision": 0.2619647355163728,
+    "inside_band": 0.46851385390428213,
+    "band_width": 0.7125322818756104,
+    "n_nonoverlap": 146.0,
+    "precision_nonoverlap": 0.2534246575342466,
+    "n_up": 557.0,
+    "n_down": 237.0
+  },
+  "ungated_sign_accuracy": 0.5106666666666667,
+  "baselines": {
+    "majority": 0.532,
+    "momentum": 0.48933333333333334,
+    "revert": 0.5146666666666667
+  },
+  "test_up_base_rate": 0.09099550639474593,
+  "test_down_base_rate": 0.10343933632907017,
+  "band_coverage_all_test": 0.6012789491876944,
+  "fake_breakout_share_of_missed_up": 1.0,
+  "reached_75": false,
+  "notes": [
+    "CONTINUE. Held-out precision is under 75%, or there are too few calls to trust it.",
+    "Before the confidence gate, direction is within 2 points of the best baseline. The gate is not creating an edge by itself.",
+    "Of the missed UP calls, 100% touched +0.40% and then closed back below it. The next version should train on the close holding, not the wick.",
+    "Do not lower the 0.40% move yet. A smaller target is a harder call, not an easier one."
+  ],
+  "fees_included": false
+}

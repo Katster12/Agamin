@@ -1,0 +1,55 @@
+threads 8
+device cpu
+cwd /home/ubuntu/crypto/grok_edit_v1
+device pick: cuda if present, otherwise cpu
+grok_edit_v1 reads BTC.csv and does not write it
+rows 77455 features 29
+dates 2025-05-19 17:05:00 -> 2026-02-12 15:35:00
+median bar 300 sec, horizon 30.0 min
+windows train 54165 val 11565 test 11572 embargo 6 seq 48
+train counts down/flat/up 2946 48359 2860
+parameters 156934
+epoch 01 train 1.2436 (ce 1.0595 pb 0.1841) val 1.1542  best
+epoch 02 train 1.1575 (ce 1.0097 pb 0.1477) val 1.1246  best
+epoch 03 train 1.1315 (ce 0.9890 pb 0.1425) val 1.1336
+epoch 04 train 1.1119 (ce 0.9718 pb 0.1400) val 1.1381
+epoch 05 train 1.0791 (ce 0.9413 pb 0.1378) val 1.1922
+epoch 06 train 1.0298 (ce 0.8939 pb 0.1359) val 1.2179
+epoch 07 train 0.9804 (ce 0.8463 pb 0.1341) val 1.2420
+epoch 08 train 0.9169 (ce 0.7851 pb 0.1319) val 1.4028
+early stop, validation loss flat for 6 epochs
+validation threshold curve, selection set only
+  val p>=0.40  precision 0.095  calls 3421  nonoverlap 0.095 (613)
+  val p>=0.45  precision 0.115  calls 2078  nonoverlap 0.102 (372)
+  val p>=0.50  precision 0.129  calls 402  nonoverlap 0.154 (78)
+  val p>=0.55  precision none  calls 0  nonoverlap none (0)
+  val p>=0.60  precision none  calls 0  nonoverlap none (0)
+  val p>=0.65  precision none  calls 0  nonoverlap none (0)
+  val p>=0.70  precision none  calls 0  nonoverlap none (0)
+  val p>=0.75  precision none  calls 0  nonoverlap none (0)
+selected p_star 0.50 on validation, then test is scored once
+
+TEST scored once at p_star 0.50 and min_move 0.40 percent
+gated precision 0.262 on 794 calls (up 557 down 237)
+nonoverlap precision 0.253 on 146 calls
+called band coverage 0.469 mean width 0.713
+all-test band coverage 0.601 (about 0.60 if calibrated)
+ungated sign accuracy 0.511 on 2250 bars with a move of at least 0.40%
+baseline majority 0.532 momentum 0.489 revert 0.515
+test base rate of a 0.40% move: up 0.091 down 0.103
+fake-breakout share of missed UP calls 1.000
+fees and spread are not in these numbers
+last 5 test bars: time close p_up at_least at_most target call
+2026-02-12 15:15    67376  0.35  -0.28  +0.23  +0.19 ABSTAIN
+2026-02-12 15:20    67509  0.35  -0.28  +0.23  -0.13 ABSTAIN
+2026-02-12 15:25    67550  0.35  -0.28  +0.23  +0.09 ABSTAIN
+2026-02-12 15:30    67547  0.35  -0.28  +0.24  +0.27 ABSTAIN
+2026-02-12 15:35    67539  0.35  -0.28  +0.24  +0.34 ABSTAIN
+deployment check on the last bar only (it is inside the test window, not an extra score)
+live 2026-02-12 15:35 close 67539 p_up 0.35 at_least -0.28 at_most +0.24 call ABSTAIN
+note CONTINUE. Held-out precision is under 75%, or there are too few calls to trust it.
+note Before the confidence gate, direction is within 2 points of the best baseline. The gate is not creating an edge by itself.
+note Of the missed UP calls, 100% touched +0.40% and then closed back below it. The next version should train on the close holding, not the wick.
+note Do not lower the 0.40% move yet. A smaller target is a harder call, not an easier one.
+RESULT reached_75 False
+saved /home/ubuntu/crypto/grok_edit_v1

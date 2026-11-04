@@ -1,0 +1,29 @@
+[
+  {
+    "symbol": "ADA",
+    "label": "30min",
+    "best_model": "bilstm",
+    "test_sign": 0.526,
+    "test_windows": 5999,
+    "test_mae_pct": 0.388,
+    "reached_70": false
+  },
+  {
+    "symbol": "XRP",
+    "label": "12h",
+    "best_model": "bilstm",
+    "test_sign": 0.569,
+    "test_windows": 225,
+    "test_mae_pct": 1.671,
+    "reached_70": false
+  },
+  {
+    "symbol": "XRP",
+    "label": "24h",
+    "best_model": "bilstm",
+    "test_sign": 0.67,
+    "test_windows": 100,
+    "test_mae_pct": 2.586,
+    "reached_70": false
+  }
+]
