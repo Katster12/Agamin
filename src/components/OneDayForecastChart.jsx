@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Activity } from 'lucide-react';
+import { compute1DForecastData } from '../services/forecastUtils';
 
 const fmtNum = (n, dec = 2) => {
   if (n == null || isNaN(n)) return '—';
@@ -13,67 +14,7 @@ const fmtNum = (n, dec = 2) => {
   return absN.toFixed(6);
 };
 
-export const compute1DForecastData = (prices, coin, prediction) => {
-  if (!prices || prices.length < 2) return null;
-
-  const vals = prices.map((p) => p[1]);
-  const currentPrice = vals[vals.length - 1];
-  const startPrice = vals[0];
-  const change24h = ((currentPrice - startPrice) / startPrice) * 100;
-
-  // Compute 1-day target change percentage
-  let avgChangePct;
-  if (prediction?.change && !isNaN(parseFloat(prediction.change))) {
-    const pChange = parseFloat(prediction.change);
-    avgChangePct = pChange * 0.45;
-  } else {
-    avgChangePct = change24h * 0.4;
-  }
-
-  // Ensure healthy visual separation
-  if (Math.abs(avgChangePct) < 1.0) {
-    avgChangePct = change24h >= 0 ? 2.2 : -1.8;
-  }
-
-  // Calculate 24h volatility
-  const returns = [];
-  for (let i = 1; i < vals.length; i++) {
-    returns.push((vals[i] - vals[i - 1]) / vals[i - 1]);
-  }
-  const meanRet = returns.reduce((a, b) => a + b, 0) / (returns.length || 1);
-  const variance = returns.reduce((a, b) => a + Math.pow(b - meanRet, 2), 0) / (returns.length || 1);
-  const hourlyStd = Math.sqrt(variance);
-  const dailyVolatilityPct = Math.min(22, Math.max(4.5, hourlyStd * Math.sqrt(24) * 100 * 1.6));
-
-  const maxChangePct = Math.max(avgChangePct + dailyVolatilityPct, dailyVolatilityPct * 0.9);
-  const minChangePct = Math.min(avgChangePct - dailyVolatilityPct, -dailyVolatilityPct * 0.85);
-
-  const avgPrice = currentPrice * (1 + avgChangePct / 100);
-  const maxPrice = currentPrice * (1 + maxChangePct / 100);
-  const minPrice = currentPrice * (1 + minChangePct / 100);
-
-  const diff = avgPrice - currentPrice;
-  const diffPct = avgChangePct;
-
-  // Deterministic analyst count based on coin id
-  const seed = (coin?.id || 'coin').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const analystCount = 28 + (seed % 25);
-
-  return {
-    currentPrice,
-    avgPrice,
-    maxPrice,
-    minPrice,
-    avgChangePct,
-    maxChangePct,
-    minChangePct,
-    diff,
-    diffPct,
-    analystCount,
-  };
-};
-
-export const OneDayForecastChart = ({ chartData, coin, prediction }) => {
+export const OneDayForecastChart = ({ chartData, prediction }) => {
   const svgRef = useRef(null);
   const [hoverState, setHoverState] = useState(null);
 
@@ -86,7 +27,7 @@ export const OneDayForecastChart = ({ chartData, coin, prediction }) => {
     );
   }
 
-  const forecast = compute1DForecastData(prices, coin, prediction);
+  const forecast = compute1DForecastData(prices, prediction);
   if (!forecast) return null;
 
   const {
