@@ -1,0 +1,64 @@
+=== BNB 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.514 on 5999  MAE 0.240%
+=== BNB 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.471 on 225  MAE 1.244%
+=== BNB 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.490 on 100  MAE 1.823%
+=== XRP 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.495 on 5999  MAE 0.331%
+=== XRP 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.569 on 225  MAE 1.671%
+=== XRP 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.670 on 100  MAE 2.586%
+=== DOGE 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.521 on 5999  MAE 0.354%
+=== DOGE 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.533 on 225  MAE 1.904%
+=== DOGE 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.380 on 100  MAE 2.959%
+=== TRX 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.467 on 5999  MAE 0.116%
+=== TRX 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.471 on 225  MAE 0.756%
+=== TRX 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.510 on 100  MAE 1.096%
+=== ADA 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.526 on 5999  MAE 0.388%
+=== ADA 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.458 on 225  MAE 2.018%
+=== ADA 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.470 on 100  MAE 3.235%
+=== AVAX 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.498 on 5999  MAE 0.355%
+=== AVAX 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.551 on 225  MAE 1.774%
+=== AVAX 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.410 on 100  MAE 2.765%
+=== LINK 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.514 on 5999  MAE 0.364%
+=== LINK 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.564 on 225  MAE 1.737%
+=== LINK 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.580 on 100  MAE 2.657%
+DONE [{"symbol": "BNB", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.5139189864977496, "test_mae_pct": 0.23997903243156368, "reached_70": false}, {"symbol": "BNB", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.4711111111111111, "test_mae_pct": 1.2435143623655347, "reached_70": false}, {"symbol": "BNB", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.49, "test_mae_pct": 1.8227097601821507, "reached_70": false}, {"symbol": "XRP", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.4945824304050675, "test_mae_pct": 0.33061095477750924, "reached_70": false}, {"symbol": "XRP", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.5688888888888889, "test_mae_pct": 1.6709961397569342, "reached_70": false}, {"symbol": "XRP", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.67, "test_mae_pct": 2.5857005370487354, "reached_70": false}, {"symbol": "DOGE", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.5209201533588932, "test_mae_pct": 0.35433887776768236, "reached_70": false}, {"symbol": "DOGE", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.5333333333333333, "test_mae_pct": 1.9035848440907037, "reached_70": false}, {"symbol": "DOGE", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.38, "test_mae_pct": 2.9585905840891926, "reached_70": false}, {"symbol": "TRX", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.46741123520586764, "test_mae_pct": 0.11597894878471815, "reached_70": false}, {"symbol": "TRX", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.4711111111111111, "test_mae_pct": 0.7564832943530917, "reached_70": false}, {"symbol": "TRX", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.51, "test_mae_pct": 1.096305102875664, "reached_70": false}, {"symbol": "ADA", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.5257542923820637, "test_mae_pct": 0.3881062260391556, "reached_70": false}, {"symbol": "ADA", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.4577777777777778, "test_mae_pct": 2.01751502135581, "reached_70": false}, {"symbol": "ADA", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.47, "test_mae_pct": 3.235376591258033, "reached_70": false}, {"symbol": "AVAX", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.49758293048841473, "test_mae_pct": 0.3546957957509622, "reached_70": false}, {"symbol": "AVAX", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.5511111111111111, "test_mae_pct": 1.7741161662544693, "reached_70": false}, {"symbol": "AVAX", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.41, "test_mae_pct": 2.764807446010943, "reached_70": false}, {"symbol": "LINK", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.5135855975996, "test_mae_pct": 0.3635694291569386, "reached_70": false}, {"symbol": "LINK", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.5644444444444444, "test_mae_pct": 1.737093057388393, "reached_70": false}, {"symbol": "LINK", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.58, "test_mae_pct": 2.6574356889599486, "reached_70": false}]

@@ -1,0 +1,11 @@
+{
+  "symbol": "XRP",
+  "label": "12h",
+  "model": "bilstm",
+  "train_days": 203.0,
+  "test_days": 112.0,
+  "test_windows": 225,
+  "test_sign": 0.5688888888888889,
+  "test_mae_pct": 1.6709961397569342,
+  "reached_70": false
+}

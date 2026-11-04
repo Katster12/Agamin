@@ -1,0 +1,28 @@
+=== BTC 30min ===
+rows 13461 train_days 202.7 test_days 77.4 train 9729 test 3717
+TEST BiLSTM sign 0.501 on 3717  MAE 0.231%
+=== BTC 12h ===
+rows 550 train_days 203.0 test_days 64.5 train 407 test 130
+TEST BiLSTM sign 0.469 on 130  MAE 1.204%
+=== BTC 24h ===
+rows 263 train_days 200.0 test_days 52.0 train 201 test 53
+TEST BiLSTM sign 0.434 on 53  MAE 1.852%
+=== ETH 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.522 on 5999  MAE 0.315%
+=== ETH 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.462 on 225  MAE 1.689%
+=== ETH 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.500 on 100  MAE 2.585%
+=== SOL 30min ===
+rows 15743 train_days 202.7 test_days 125.0 train 9729 test 5999
+TEST BiLSTM sign 0.510 on 5999  MAE 0.354%
+=== SOL 12h ===
+rows 645 train_days 203.0 test_days 112.0 train 407 test 225
+TEST BiLSTM sign 0.533 on 225  MAE 1.843%
+=== SOL 24h ===
+rows 310 train_days 200.0 test_days 99.0 train 201 test 100
+TEST BiLSTM sign 0.470 on 100  MAE 2.779%
+DONE [{"symbol": "BTC", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 77.42, "test_windows": 3717, "test_sign": 0.5014796879203659, "test_mae_pct": 0.23132718573373828, "reached_70": false}, {"symbol": "BTC", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 64.5, "test_windows": 130, "test_sign": 0.46923076923076923, "test_mae_pct": 1.2036055405619628, "reached_70": false}, {"symbol": "BTC", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 52.0, "test_windows": 53, "test_sign": 0.4339622641509434, "test_mae_pct": 1.8523608220116583, "reached_70": false}, {"symbol": "ETH", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.5220870145024171, "test_mae_pct": 0.3152630511458097, "reached_70": false}, {"symbol": "ETH", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.4622222222222222, "test_mae_pct": 1.6892569293345967, "reached_70": false}, {"symbol": "ETH", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.5, "test_mae_pct": 2.585333526029527, "reached_70": false}, {"symbol": "SOL", "label": "30min", "model": "bilstm", "train_days": 202.67, "test_days": 124.96, "test_windows": 5999, "test_sign": 0.5099183197199533, "test_mae_pct": 0.3536757198974112, "reached_70": false}, {"symbol": "SOL", "label": "12h", "model": "bilstm", "train_days": 203.0, "test_days": 112.0, "test_windows": 225, "test_sign": 0.5333333333333333, "test_mae_pct": 1.842931064532888, "reached_70": false}, {"symbol": "SOL", "label": "24h", "model": "bilstm", "train_days": 200.0, "test_days": 99.0, "test_windows": 100, "test_sign": 0.47, "test_mae_pct": 2.778616445704155, "reached_70": false}]
