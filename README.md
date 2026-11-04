@@ -50,7 +50,9 @@ Useful endpoints:
 
 The checked-in systemd units under `deploy/` run the ML service and its outbound HTTPS tunnel.
 The frontend's Vercel function proxies `/api/predict` to that HTTPS service, while Vite proxies to
-`localhost:8000` during development.
+`localhost:8000` during development. `deploy/tunnel_runner.py` publishes a replacement quick-tunnel
+hostname to the endpoint registry after a service or machine restart; the Vercel proxy caches that
+registry value for one minute.
 
 Environment controls include `AGAMIN_WORKERS`, `AGAMIN_REFRESH_SECONDS`, `AGAMIN_STATE_DIR`,
 `AGAMIN_API_KEY`, `ALPHA_VANTAGE_KEYS`, `TRENDS_PROXY_URL`, and `AGAMIN_ENABLE_TRENDS`.
